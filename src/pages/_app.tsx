@@ -13,14 +13,19 @@ export default function App({ Component, pageProps }: AppProps) {
   const toggleColorScheme = (value?: ColorScheme) => {
     setColorScheme(value || (colorScheme === "dark" ? "light" : "dark"));
   };
-  return <ColorSchemeProvider colorScheme="dark" toggleColorScheme={toggleColorScheme}>
-    <MantineProvider
-      theme={{ colorScheme, primaryColor: "green" }}
-      withNormalizeCSS
-      withGlobalStyles
+  return (
+    <ColorSchemeProvider
+      colorScheme={colorScheme}
+      toggleColorScheme={toggleColorScheme}
     >
-      <Notifications position="top-right" zIndex={2077}></Notifications>
-      <Component {...pageProps} />
-    </MantineProvider>
-  </ColorSchemeProvider>;
+      <MantineProvider
+        theme={{ colorScheme, primaryColor: "green" }}
+        withNormalizeCSS
+        withGlobalStyles
+      >
+        <Notifications position="top-right" zIndex={2077}></Notifications>
+        <Component {...pageProps} />
+      </MantineProvider>
+    </ColorSchemeProvider>
+  );
 }
