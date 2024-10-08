@@ -6,6 +6,7 @@ import {
   type ParsedEvent,
   type ReconnectInterval,
 } from "eventsource-parser";
+import { MAX_TOKEN, TEMPERATURE } from "../utils/constant";
 type StreamPayload = {
   model: string;
   messages: MessageList;
@@ -16,13 +17,13 @@ type StreamPayload = {
 
 export default async function handler(req: NextRequest) {
   const { prompt, history = [], options = {} } = await req.json();
+  const { max_tokens, temperature } = options;
   const data = {
     model: "moonshot-v1-8k",
     messages: [
       {
         role: "system",
-        content:
-          "你是 Kimi，由 Moonshot AI 提供的人工智能助手，你更擅长中文和英文的对话。你会为用户提供安全，有帮助，准确的回答。同时，你会拒绝一切涉及恐怖主义，种族歧视，黄色暴力等问题的回答。Moonshot AI 为专有名词，不可翻译成其他语言。",
+        content:options.prompt
       },
       ...history,
       {
@@ -31,11 +32,11 @@ export default async function handler(req: NextRequest) {
       },
     ],
     stream: true,
-    ...options,
+    temperature: +temperature || TEMPERATURE,
+    max_tokens: +max_tokens || MAX_TOKEN, 
   };
   const stream = await requestStream(data);
   return new Response(stream);
-
 }
 
 //create a stream

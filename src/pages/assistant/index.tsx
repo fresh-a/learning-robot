@@ -94,7 +94,7 @@ const Assistant: NextPage = () => {
             <Text weight={500} className="line-clamp-1">
               {item.name}
             </Text>
-            <Text size="sm" color="dinmed" className="line-clamp-3 mt-2">
+            <Text size="sm" color="dimmed" className="line-clamp-3 mt-2">
               {item.prompt}
             </Text>
             <Group className="mt-4 flex items-center">

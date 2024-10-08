@@ -4,8 +4,10 @@ import type {
   ChatLogsStorageType,
   MessageList,
   Session,
+  SessionInfo,
   SessionList,
 } from "../types";
+import * as assistantStore from "@/pages/utils/assistantStore";
 import { getLocal, setLocal } from "./storage";
 
 /**
@@ -46,9 +48,12 @@ export const clearMessage = (id: string) => {
 
 export const getSessionStore = () => {
   let list = getLocal(SESSION_STORE) as SessionList;
+  const assistant = assistantStore.getList()[0];
+
   if (!list) {
     const session = {
       name: "chat",
+      assistant:assistant.id,
       id: Date.now().toString(),
     };
 
@@ -70,9 +75,20 @@ export const addSession = (session: Session): SessionList => {
   return list;
 };
 
-export const getSession = (id: string) => {
+export const getSession = (id: string):SessionInfo | null => {
   const list = getSessionStore();
-  return list.find((session) => session.id === id) || {};
+  const session = list.find((session)=>session.id ===id)
+  if(!session) return null;
+  const {assistant} = session;
+  let assistantInfo = assistantStore.getAssistant(assistant);
+  if(!assistantInfo){
+    assistantInfo = assistantStore.getList()[0];
+    updateSession(session.id,{assistant:assistantInfo.id});
+  }
+  return {
+    ...session,
+    assistant:assistantInfo,
+  }
 };
 
 export const updateSession = (

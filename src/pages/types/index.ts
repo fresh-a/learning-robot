@@ -9,7 +9,11 @@ export type MessageList = Message[];
 
 export type Session = {
   name: string;
+  assistant: string;
   id: string;
+};
+export type SessionInfo = Omit<Session, "assistant"> & {
+  assistant: Assistant;
 };
 
 export type SessionList = Session[];

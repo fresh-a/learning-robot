@@ -2,6 +2,9 @@ export const MESSAGE_STORE = "ai_assistant_message";
 export const SESSION_STORE = "ai_assistant_session";
 export const ASSISTANT_STORE = "ai_assistant";
 
+export const MAX_TOKEN = 1000;
+export const TEMPERATURE = 0.8;
+
 export const ASSISTANT_INIT = [
   {
     name: "AI助手",
@@ -12,3 +15,8 @@ export const ASSISTANT_INIT = [
     max_tokens: 800,
   },
 ];
+
+export const USERMAP = {
+  "user":"用户",
+  "assistant":"助理"
+};

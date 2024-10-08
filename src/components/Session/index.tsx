@@ -32,7 +32,7 @@ const generateItemClasses = (
   ]);
 };
 
-export const Session = ({ sessionId, onChange }: Props) => {
+export const Session = ({ sessionId, onChange,className }: Props) => {
   const [sessionList, setSessionList] = useState<SessionList>([]);
   const { colorScheme } = useMantineColorScheme();
   useEffect(() => {
@@ -76,7 +76,8 @@ export const Session = ({ sessionId, onChange }: Props) => {
         "w-64",
         "flex",
         "flex-col",
-        "px-2"
+        "px-2",
+        className,
       )}
     >
       <div className="flex justify-between item-center py-2 w-full">
