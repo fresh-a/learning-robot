@@ -2,7 +2,7 @@ import { getLocal, setLocal } from "./storage";
 import { ASSISTANT_INIT, ASSISTANT_STORE } from "./constant";
 import type { AssistantList, Assistant } from "../types";
 
-export const getList = (): AssistantList => {
+const getList = (): AssistantList => {
   let list = getLocal(ASSISTANT_STORE) as AssistantList;
   if (!list) {
     list = ASSISTANT_INIT.map((item, index) => {
@@ -16,18 +16,21 @@ export const getList = (): AssistantList => {
   return list;
 };
 
-export const updateList = (list: AssistantList) => {
+const updateList = (list: AssistantList) => {
   setLocal(ASSISTANT_STORE, list);
 };
 
-export const addAssistant = (assistant: Assistant) => {
+const addAssistant = (assistant: Assistant): AssistantList => {
   const list = getList();
   list.push(assistant);
   updateList(list);
   return list;
 };
 
-export const updateAssistant = (id: string, data: Partial<Omit<Assistant, "id">>) => {
+const updateAssistant = (
+  id: string,
+  data: Partial<Omit<Assistant, "id">>
+): AssistantList => {
   const list = getList();
   const index = list.findIndex((item) => item.id === id);
   if (index > -1) {
@@ -40,14 +43,23 @@ export const updateAssistant = (id: string, data: Partial<Omit<Assistant, "id">>
   return list;
 };
 
-export const removeAssistant = (id: string) => {
+const removeAssistant = (id: string): AssistantList => {
   const list = getList();
   const newList = list.filter((item) => item.id !== id);
-  updateList(list);
+  updateList(newList);
   return newList;
 };
 
-export const getAssistant = (id: string): Assistant | null => {
+const getAssistant = (id: string): Assistant | null => {
   const list = getList();
   return list.find((item) => item.id === id) || null;
 };
+
+export {
+  getList,
+  addAssistant,
+  updateAssistant,
+  removeAssistant,
+  getAssistant,
+};
+
