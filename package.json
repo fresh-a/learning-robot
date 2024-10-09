@@ -19,6 +19,7 @@
     "eventsource-parser": "^2.0.1",
     "highlight.js": "^11.10.0",
     "marked": "^14.1.2",
+    "marked-highlight": "^2.1.4",
     "next": "^14.2.14",
     "react": "^18",
     "react-dom": "^18"

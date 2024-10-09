@@ -1,7 +1,14 @@
 import React from "react";
 import { marked } from "marked";
+import { markedHighlight } from "marked-highlight"; 
 import hljs from "highlight.js";
+import javascript from "highlight.js/lib/languages/javascript";
+import typescript from "highlight.js/lib/languages/typescript";
 import "highlight.js/styles/atom-one-dark.css";
+
+// 注册语言
+hljs.registerLanguage("javascript", javascript);
+hljs.registerLanguage("typescript", typescript);
 
 import styles from "./index.module.css";
 type IProps = {
@@ -9,17 +16,18 @@ type IProps = {
 };
 
 export const Markdown = (props: IProps) => {
-  const renderer = new marked.Renderer();
-  renderer.code = (code: any, language: string) => {
-    const validLanguage = hljs.getLanguage(language) ? language : "plaintext";
-    const highlightedCode = hljs.highlight(validLanguage, code).value;
-    return `<pre><code class="hljs ${validLanguage}" style="border-radius:5px">${highlightedCode}</code></pre>`;
-  };
+
   const markdownText = props.markdownText;
-  marked.setOptions({
-    renderer,
-  });
   const html = marked(markdownText);
+  marked.use(markedHighlight({
+    langPrefix: 'hljs language-',
+    highlight(code, lang) {
+      const language = hljs.getLanguage(lang) ? lang : 'shell'
+      return hljs.highlight(code, { language }).value
+    }
+  }))
+  hljs.highlightAll();
+
   return (
     <div
       dangerouslySetInnerHTML={{ __html: html }}
