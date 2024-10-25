@@ -20,3 +20,5 @@ export const USERMAP = {
   "user":"用户",
   "assistant":"助理"
 };
+
+export const OPENAI_END_POINT = '';
