@@ -19,7 +19,8 @@ export default async function handler(req: NextRequest) {
   const { prompt, history = [], options = {} } = await req.json();
   const { max_tokens, temperature } = options;
   const data = {
-    model: "moonshot-v1-8k",
+    // model: "moonshot-v1-8k",
+    model: "gpt-4o-mini",
     messages: [
       {
         role: "system",

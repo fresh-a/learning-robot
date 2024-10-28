@@ -9,11 +9,14 @@ export default async function handler(req: NextRequest) {
   const file = formData.get("file") as Uploadable;
   const history = JSON.parse(formData.get("history") as string) as MessageList;
   const options = JSON.parse(formData.get("options") as string);
+  console.log(openai);
+  
   //speech to text
   const transcription = await openai.audio.transcriptions.create({
-    file,
+    file:file,
     model: "whisper-1",
   });
+  console.log(transcription);
   //text completion
   const completion = await openai.chat.completions.create({
     messages: [
@@ -27,8 +30,10 @@ export default async function handler(req: NextRequest) {
         content: transcription.text,
       },
     ],
-    model: "moonshot-v1-16k",
+    // model: "moonshot-v1-16k",
+    model: "gpt-3.5-turbo-1106",
   });
+
 
   //text to speech
   const audio = await openai.audio.speech.create({

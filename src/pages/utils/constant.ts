@@ -21,4 +21,4 @@ export const USERMAP = {
   "assistant":"助理"
 };
 
-export const OPENAI_END_POINT = '';
+export const OPENAI_END_POINT = 'https://www.dmxapi.com/';

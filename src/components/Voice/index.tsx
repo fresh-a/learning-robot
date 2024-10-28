@@ -56,6 +56,7 @@ export function Voice({
         answer(blob);
       });
   };
+
   const updateMessage = (message: MessageList) => {
     const list = chatStorage.getMessage(sessionId);
     chatStorage.updateMessage(sessionId, [...list, ...message]);
@@ -67,7 +68,7 @@ export function Voice({
     let options = assistant;
 
     const formData = new FormData();
-    formData.append("file", blob, "primpt.mp3");
+    formData.append("file", blob, "prompt.mp3");
     formData.append("options", JSON.stringify(options));
     formData.append(
       "history",
@@ -78,6 +79,7 @@ export function Voice({
       method: "POST",
       body: formData,
     });
+    
     const { audioUrl, transcription, completion } = await resp.json();
     setIsLoading(false);
     updateMessage([
