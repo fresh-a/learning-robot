@@ -1,4 +1,4 @@
-import { useEffect, useState, KeyboardEvent } from "react";
+import { useRef, useEffect, useState, KeyboardEvent } from "react";
 import chatService from "@/pages/utils/chatService";
 import { Markdown } from "../Markdown";
 import { Voice } from "../Voice";
@@ -21,10 +21,17 @@ import {
   IconDotsVertical,
   IconHeadphones,
   IconHeadphonesOff,
+  IconUpload,
+  IconTransfer,
+  IconHttpDelete,
+  IconTrash,
 } from "@tabler/icons-react";
 import { Assistant, MessageList } from "@/pages/types";
 import clsx from "clsx";
 import { AssistantSelect } from "../AssistantSelect";
+import { createWorker } from "tesseract.js";
+import Tesseract from "tesseract.js";
+import Image from "next/image";
 type Props = {
   sessionId: string;
 };
@@ -36,6 +43,12 @@ export const Message = ({ sessionId }: Props) => {
   const [assistant, setAssistant] = useState<Assistant>();
   const [mode, setMode] = useState<"text" | "voice">("text");
   const { colorScheme } = useMantineColorScheme();
+
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [ImageURL, setImageURL] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
   const updateMessage = (msg: MessageList) => {
     setMessage(msg);
     chatStorage.updateMessage(sessionId, msg);
@@ -68,6 +81,53 @@ export const Message = ({ sessionId }: Props) => {
   const onClear = () => {
     updateMessage([]);
   };
+
+  //OCR component
+  const uploadImg = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const imgToText = () => {
+    if (ImageURL) {
+      setLoading(true);
+      Tesseract.recognize(ImageURL, "eng", {
+        logger: (m) => console.log(m), // 可以用来监控进度
+      })
+        .then(({ data: { text } }) => {
+          console.log(text);
+          setPrompt(prompt + text);
+          // 设置识别的文本
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.error(err);
+          setLoading(false);
+        });
+    }
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImageURL(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+      setSelectedFile(file);
+      console.log("selected file", file.name);
+    }
+  };
+
+  const removeImg = ()=>{
+    setSelectedFile(null);
+    setImageURL(null);
+    if (fileInputRef.current) {
+        fileInputRef.current.value = ''; // 清空文件输入
+    }
+  }
 
   const onKeyDown = (evt: KeyboardEvent<HTMLTextAreaElement>) => {
     if (evt.keyCode === 13 && !evt.shiftKey) {
@@ -159,20 +219,20 @@ export const Message = ({ sessionId }: Props) => {
           </Popover.Dropdown>
         </Popover>
         <div className="flex item-center">
-        <AssistantSelect
-          value={assistant?.id!}
-          onChange={onAssistantChange}
-        ></AssistantSelect>
-        <ActionIcon
-          size="sm"
-          onClick={() => setMode(mode === "text" ? "voice" : "text")}
-        >
-          {mode === "text" ? (
-            <IconHeadphones color="green" size="1rem"></IconHeadphones>
-          ) : (
-            <IconHeadphonesOff color="gray" size="1rem"></IconHeadphonesOff>
-          )}
-        </ActionIcon>
+          <AssistantSelect
+            value={assistant?.id!}
+            onChange={onAssistantChange}
+          ></AssistantSelect>
+          <ActionIcon
+            size="sm"
+            onClick={() => setMode(mode === "text" ? "voice" : "text")}
+          >
+            {mode === "text" ? (
+              <IconHeadphones color="green" size="1rem"></IconHeadphones>
+            ) : (
+              <IconHeadphonesOff color="gray" size="1rem"></IconHeadphonesOff>
+            )}
+          </ActionIcon>
         </div>
         <ThemeSwitch></ThemeSwitch>
       </div>
@@ -249,16 +309,57 @@ export const Message = ({ sessionId }: Props) => {
           >
             <ActionIcon
               className="mr-2"
+              title="Clear data"
               disabled={loading}
               onClick={() => onClear()}
             >
               <IconEraser></IconEraser>
             </ActionIcon>
+            <ActionIcon
+              className="mr-2"
+              title="Upload img"
+              disabled={loading}
+              onClick={() => uploadImg()}
+            >
+              <IconUpload></IconUpload>
+            </ActionIcon>
+            <input
+              type="file"
+              ref={fileInputRef}
+              style={{ display: "none" }}
+              onChange={handleFileChange}
+            />
+            {selectedFile && ImageURL && (
+              <div className="flex flex-row flex-wrap gap-[20px] m-4">
+                <div className="flex items-center justify-center">
+                  <ActionIcon
+                    title="Img to text"
+                    className="mr-2 rounded"
+                    disabled={loading}
+                    onClick={() => imgToText()}
+                  >
+                    <IconTransfer></IconTransfer>
+                  </ActionIcon>
+                </div>
+                <div className="flex justify-center flex-col rounded-[20px] border w-[180px] h-[100px] relative border-gray-200 bg-primary-100 ">
+                  <div title="Delete file" className="flex w-[20px] h-[20px] items-center justify-center rounded-full bg-gray-100 absolute top-[8px] left-[150px] z-10 text-red-600 cursor-pointer w-[16px] h-[16px]">
+                 <IconTrash onClick={()=> removeImg()}></IconTrash>
+                  </div>
+                  <div className="flex flex-col items-center w-full relative">
+                    <img
+                      className="w-full h-[100px] relative rounded cursor-zoom-in object-cover"
+                      src={ImageURL}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
             <Textarea
               placeholder="Enter your prompt"
               className="w-3/5"
               value={prompt}
               disabled={loading}
+              ref={textareaRef}
               onKeyDown={(evt) => onKeyDown(evt)}
               onChange={(evt) => setPrompt(evt.target.value)}
             ></Textarea>
@@ -294,7 +395,9 @@ export const Message = ({ sessionId }: Props) => {
         </>
       ) : (
         <div className="h-[calc(100vh-56rem)]  w-full">
-          <Voice sessionId={sessionId} assistant={assistant!}> </Voice>
+          <Voice sessionId={sessionId} assistant={assistant!}>
+            {" "}
+          </Voice>
         </div>
       )}
     </div>
